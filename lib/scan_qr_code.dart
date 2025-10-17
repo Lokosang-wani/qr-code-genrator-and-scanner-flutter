@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import 'package:qr_code_generator_and_scanner/qr_scanner_screen.dart';
@@ -13,10 +14,27 @@ class ScanQrCode extends StatefulWidget {
 class _ScanQrCodeState extends State<ScanQrCode> {
   String qrResult = 'Scanned Data will appear here';
   Future<void> scanQR() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => QrScannerScreen()),
-    );
+    try {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const QrScannerScreen()),
+      );
+
+      if (result != null && mounted) {
+        setState(() {
+          qrResult = result;
+        });
+      }
+    } on PlatformException {
+      setState(() {
+        qrResult = 'Failed to read QR code (PlatformException)';
+      });
+    } catch (e) {
+      // catch any other errors
+      setState(() {
+        qrResult = 'Error occurred: $e';
+      });
+    }
   }
 
   @override
